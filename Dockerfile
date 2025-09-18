@@ -7,8 +7,11 @@ RUN pip install uv
 # Set working directory
 WORKDIR /app
 
-# Copy pyproject.toml and install dependencies
-COPY pyproject.toml ./
+# Copy pyproject.toml, README.md and source code
+COPY pyproject.toml README.md ./
+COPY src/ /app/src/
+
+# Install dependencies
 RUN uv venv && \
     uv pip install -e .
 
@@ -31,7 +34,7 @@ COPY --from=builder /app/.venv /app/.venv
 
 # Copy application code
 COPY src/ /app/src/
-COPY pyproject.toml /app/
+COPY pyproject.toml README.md /app/
 
 # Set up environment
 ENV PATH="/app/.venv/bin:$PATH"
@@ -49,10 +52,10 @@ WORKDIR /app
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:53456/health || exit 1
 
 # Expose port
-EXPOSE 8080
+EXPOSE 53456
 
 # Default command
 CMD ["mcp-proxy", "run", "--config", "/config/docker.json"]
