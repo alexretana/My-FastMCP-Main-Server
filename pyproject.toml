@@ -1,0 +1,158 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-proxy-server"
+version = "0.1.0"
+description = "A high-performance proxy server for aggregating multiple MCP (Model Context Protocol) servers"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "MCP Proxy Contributors" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+keywords = ["mcp", "model-context-protocol", "proxy", "server", "fastmcp"]
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=0.1.0",
+    "pydantic>=2.0.0",
+    "click>=8.0.0",
+    "httpx>=0.25.0",
+    "uvloop>=0.17.0; sys_platform != 'win32'",
+    "aiofiles>=23.0.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+    "flake8>=6.0.0",
+    "pre-commit>=3.0.0",
+]
+monitoring = [
+    "prometheus_client>=0.17.0",
+]
+auth = [
+    "pyjwt>=2.8.0",
+    "cryptography>=41.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/mcp-proxy-server"
+Documentation = "https://github.com/your-org/mcp-proxy-server#readme"
+Repository = "https://github.com/your-org/mcp-proxy-server"
+Issues = "https://github.com/your-org/mcp-proxy-server/issues"
+
+[project.scripts]
+mcp-proxy = "mcp_proxy_server.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_proxy_server"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/README.md",
+    "/LICENSE",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["mcp_proxy_server"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "fastmcp.*",
+    "uvloop.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=mcp_proxy_server",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-fail-under=80",
+]
+asyncio_mode = "auto"
+markers = [
+    "integration: marks tests as integration tests",
+    "slow: marks tests as slow",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["src/mcp_proxy_server"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]

@@ -1,6 +1,6 @@
 ---
 name: fastmcp-expert-dev
-description: When trying to develop, analyze, or update FactMCP projects
+description: When trying to develop, analyze, or update FastMCP projects
 model: sonnet
 color: yellow
 ---
@@ -23,11 +23,17 @@ Specialized assistant for building production-ready FastMCP (Model Context Proto
 - **Chain-of-Thought**: Step-by-step reasoning in tool implementations
 - **Few-Shot Learning**: Example-driven tool responses
 - **Structured Outputs**: JSON schemas and format specification
-- **Role-Based Prompts**: Domain expert personas mcp.json/v1.json",
+- **Role-Based Prompts**: Domain expert personas
+
+### Configuration Example
+```json
+{
+  "name": "my-fastmcp-server",
+  "version": "1.0.0",
   "source": {"path": "server.py", "entrypoint": "mcp"},
   "environment": {
     "type": "uv",
-    "python": ">=3.10", 
+    "python": ">=3.10",
     "dependencies": ["pandas", "httpx"]
   },
   "deployment": {
@@ -54,11 +60,12 @@ fastmcp project prepare --output-dir ./env
 
 ## Workflow Approach
 
-1. **Research First**: Always use context7 tools to get latest FastMCP docs
+1. **Research First**: Always use WebFetch, Grep, and Read tools to get latest FastMCP documentation and examples
 2. **Prompt Engineering**: Design tools with clear docstrings and context sampling
 3. **Structured Development**: Use factory patterns, proper configuration, testing
 4. **Production Ready**: Authentication, proper transport, error handling
-5. **Quality Assurance**: Test prompts, validate outputs, optimize performance*Performance**: Token-efficient prompts, optimized configurations
+5. **Quality Assurance**: Test prompts, validate outputs, optimize performance
+6. **Performance**: Token-efficient prompts, optimized configurations
 
 ## Expertise Focus Areas
 

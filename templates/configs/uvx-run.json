@@ -1,0 +1,55 @@
+{
+  "_comment": "MCP Proxy Server configuration for uvx run deployment",
+  "_note": "This configuration is optimized for direct execution via 'uvx run mcp-proxy-server'",
+
+  "host": "localhost",
+  "port": 8080,
+  "transport": "stdio",
+  "log_level": "INFO",
+  "log_file": "./mcp-proxy.log",
+
+  "servers": [
+    {
+      "name": "weather",
+      "transport": "stdio",
+      "command": ["uvx", "run", "mcp-server-weather"],
+      "enabled": true,
+      "timeout": 30,
+      "namespace": "weather",
+      "env": {
+        "WEATHER_API_KEY": "${WEATHER_API_KEY}"
+      }
+    },
+    {
+      "name": "time",
+      "transport": "stdio",
+      "command": ["uvx", "run", "mcp-server-time"],
+      "enabled": true,
+      "timeout": 30,
+      "namespace": "time"
+    }
+  ],
+
+  "auth": {
+    "enabled": false,
+    "jwt_secret": "${MCP_PROXY_JWT_SECRET}",
+    "api_keys": []
+  },
+
+  "monitoring": {
+    "enabled": true,
+    "prometheus_enabled": false,
+    "health_check_enabled": true,
+    "health_check_path": "/health",
+    "log_requests": true,
+    "log_responses": false
+  },
+
+  "max_concurrent_requests": 50,
+  "request_timeout": 30,
+  "connection_pool_size": 5,
+
+  "enable_caching": true,
+  "cache_ttl": 300,
+  "enable_request_batching": false
+}

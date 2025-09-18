@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  mcp-proxy:
+    build:
+      context: .
+      dockerfile: templates/Dockerfile
+    container_name: mcp-proxy-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "9090:9090"  # Prometheus metrics
+    volumes:
+      - ./config:/config:ro
+      - ./data:/data:rw
+      - ./logs:/var/log:rw
+    environment:
+      - MCP_PROXY_JWT_SECRET=${MCP_PROXY_JWT_SECRET}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - EXTERNAL_API_KEY=${EXTERNAL_API_KEY}
+      - DATABASE_MCP_URL=http://database-mcp:8080
+      - EXTERNAL_MCP_URL=http://external-mcp:8080/sse
+    env_file:
+      - .env
+    depends_on:
+      - database-mcp
+      - redis
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Example backend MCP server (database)
+  database-mcp:
+    image: example/mcp-database-server:latest
+    container_name: database-mcp
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - MCP_PORT=8080
+    ports:
+      - "8081:8080"
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus for monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - mcp-network
+
+  # Grafana for visualization (optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    networks:
+      - mcp-network
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  mcp-network:
+    driver: bridge

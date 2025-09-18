@@ -1,0 +1,34 @@
+{
+  "_comment": "Claude Desktop configuration for MCP Proxy Server",
+  "_note": "Add this configuration to your Claude Desktop settings",
+
+  "mcp_proxy_uv_install": {
+    "command": "mcp-proxy",
+    "args": ["run", "--config", "/path/to/your/mcp-proxy.json"],
+    "env": {
+      "MCP_PROXY_JWT_SECRET": "your-jwt-secret",
+      "MCP_FILESYSTEM_ROOT": "/path/to/allowed/directory"
+    }
+  },
+
+  "mcp_proxy_uvx_run": {
+    "command": "uvx",
+    "args": ["run", "mcp-proxy-server", "run", "--config", "./mcp-proxy.json"],
+    "env": {
+      "MCP_PROXY_JWT_SECRET": "your-jwt-secret",
+      "WEATHER_API_KEY": "your-weather-api-key"
+    }
+  },
+
+  "mcp_proxy_docker": {
+    "command": "docker",
+    "args": [
+      "run", "--rm", "-i",
+      "--env-file", ".env",
+      "-v", "/path/to/config:/config:ro",
+      "-v", "/path/to/data:/data:rw",
+      "mcp-proxy-server:latest",
+      "run", "--config", "/config/docker.json"
+    ]
+  }
+}

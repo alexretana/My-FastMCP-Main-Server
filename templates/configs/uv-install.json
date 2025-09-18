@@ -1,0 +1,58 @@
+{
+  "_comment": "MCP Proxy Server configuration for uv install deployment",
+  "_note": "This configuration is optimized for installation via 'uv add mcp-proxy-server'",
+
+  "host": "localhost",
+  "port": 8080,
+  "transport": "stdio",
+  "log_level": "INFO",
+  "log_file": null,
+
+  "servers": [
+    {
+      "name": "filesystem",
+      "transport": "stdio",
+      "command": ["uvx", "run", "mcp-server-filesystem", "--", "/path/to/allowed/directory"],
+      "enabled": true,
+      "timeout": 30,
+      "namespace": "fs",
+      "env": {
+        "MCP_FILESYSTEM_ROOT": "${MCP_FILESYSTEM_ROOT:-/tmp}"
+      }
+    },
+    {
+      "name": "git",
+      "transport": "stdio",
+      "command": ["uvx", "run", "mcp-server-git", "--", "/path/to/repository"],
+      "enabled": true,
+      "timeout": 30,
+      "namespace": "git",
+      "env": {
+        "GIT_REPO_PATH": "${GIT_REPO_PATH:-/tmp/repo}"
+      }
+    }
+  ],
+
+  "auth": {
+    "enabled": false,
+    "jwt_secret": "${MCP_PROXY_JWT_SECRET}",
+    "api_keys": []
+  },
+
+  "monitoring": {
+    "enabled": true,
+    "prometheus_enabled": false,
+    "health_check_enabled": true,
+    "health_check_path": "/health",
+    "log_requests": true,
+    "log_responses": false
+  },
+
+  "max_concurrent_requests": 100,
+  "request_timeout": 60,
+  "connection_pool_size": 10,
+
+  "enable_caching": false,
+  "cache_ttl": 300,
+  "enable_request_batching": false
+}
