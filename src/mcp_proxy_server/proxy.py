@@ -14,6 +14,7 @@ from contextlib import asynccontextmanager
 
 from .config import ProxyConfig
 from .server_registry import ServerRegistry
+from .fastmcp_proxy import FastMCPProxyServer
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +35,19 @@ class MCPProxyServer:
         self.running = False
         self._shutdown_event = asyncio.Event()
 
+        # Initialize FastMCP-based proxy server
+        self.fastmcp_proxy = FastMCPProxyServer(config, credentials)
+
     async def start(self) -> None:
         """Start the proxy server and all backend servers."""
         logger.info("Starting MCP Proxy Server...")
 
         try:
-            # Initialize server registry
-            await self.server_registry.initialize()
+            # Initialize FastMCP proxy server
+            await self.fastmcp_proxy.initialize()
 
-            # Start all configured servers
-            await self.server_registry.start_all_servers()
+            # Start FastMCP proxy server
+            await self.fastmcp_proxy.start()
 
             self.running = True
             logger.info(f"MCP Proxy Server started on {self.config.host}:{self.config.port}")
@@ -62,8 +66,8 @@ class MCPProxyServer:
         self._shutdown_event.set()
 
         try:
-            # Stop all servers
-            await self.server_registry.stop_all_servers()
+            # Stop FastMCP proxy server
+            await self.fastmcp_proxy.stop()
             logger.info("All servers stopped")
 
         except Exception as e:
@@ -96,8 +100,18 @@ class MCPProxyServer:
         signal.signal(signal.SIGTERM, signal_handler)
 
         try:
-            # Run the async server
-            asyncio.run(self.run_async())
+            # For stdio transport, use FastMCP's direct running
+            if self.config.transport.lower() == 'stdio':
+                # Initialize the FastMCP proxy first
+                async def init_and_run():
+                    await self.fastmcp_proxy.initialize()
+                    await self.fastmcp_proxy.start()
+                    self.fastmcp_proxy.run_stdio()
+
+                asyncio.run(init_and_run())
+            else:
+                # Run the async server for HTTP/SSE
+                asyncio.run(self.run_async())
         except KeyboardInterrupt:
             logger.info("Server interrupted")
         except Exception as e:
@@ -130,11 +144,16 @@ class MCPProxyServer:
             for server_name, status in await self.server_registry.get_all_server_status():
                 health_status["servers"][server_name] = status
 
+            # Add FastMCP proxy statistics
+            if hasattr(self, 'fastmcp_proxy'):
+                proxy_stats = self.fastmcp_proxy.get_proxy_stats()
+                health_status["fastmcp_proxy"] = proxy_stats
+
         return health_status
 
     async def get_server_info(self) -> Dict[str, Any]:
         """Get detailed information about the proxy and backend servers."""
-        return {
+        server_info = {
             "proxy": {
                 "version": "0.1.0",  # TODO: Get from package
                 "config": self.config.dict(),
@@ -147,3 +166,10 @@ class MCPProxyServer:
                 "secure": True,  # TODO: Check credential security
             }
         }
+
+        # Add FastMCP proxy information
+        if hasattr(self, 'fastmcp_proxy'):
+            proxy_stats = self.fastmcp_proxy.get_proxy_stats()
+            server_info["fastmcp_proxy"] = proxy_stats
+
+        return server_info
