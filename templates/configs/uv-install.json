@@ -10,25 +10,24 @@
 
   "servers": [
     {
-      "name": "filesystem",
+      "name": "playwright",
       "transport": "stdio",
-      "command": ["uvx", "run", "mcp-server-filesystem", "--", "/path/to/allowed/directory"],
+      "command": ["npx", "@playwright/mcp@latest"],
       "enabled": true,
       "timeout": 30,
-      "namespace": "fs",
-      "env": {
-        "MCP_FILESYSTEM_ROOT": "${MCP_FILESYSTEM_ROOT:-/tmp}"
-      }
+      "namespace": "playwright"
     },
     {
-      "name": "git",
+      "name": "obsidian",
       "transport": "stdio",
-      "command": ["uvx", "run", "mcp-server-git", "--", "/path/to/repository"],
+      "command": ["uvx", "mcp-obsidian"],
       "enabled": true,
       "timeout": 30,
-      "namespace": "git",
+      "namespace": "obsidian",
       "env": {
-        "GIT_REPO_PATH": "${GIT_REPO_PATH:-/tmp/repo}"
+        "OBSIDIAN_API_KEY": "${OBSIDIAN_API_KEY}",
+        "OBSIDIAN_HOST": "${OBSIDIAN_HOST:-127.0.0.1}",
+        "OBSIDIAN_PORT": "${OBSIDIAN_PORT:-27124}"
       }
     }
   ],

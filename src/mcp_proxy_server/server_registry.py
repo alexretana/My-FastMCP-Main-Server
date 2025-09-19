@@ -7,6 +7,7 @@ backend MCP servers that the proxy aggregates.
 
 import asyncio
 import logging
+import os
 from typing import Dict, List, Tuple, Any, Optional
 from dataclasses import dataclass, field
 from enum import Enum
@@ -134,9 +135,18 @@ class ServerRegistry:
         if not config.command:
             raise ValueError("stdio transport requires a command")
 
-        # Prepare environment - ensure all values are strings
-        env = {k: str(v) for k, v in self.credentials.items() if isinstance(k, str)}
+        # Prepare environment - start with current process environment (includes .env variables)
+        env = os.environ.copy()
+        env.update({k: str(v) for k, v in self.credentials.items() if isinstance(k, str)})
         env.update({k: str(v) for k, v in config.env.items() if isinstance(k, str)})
+
+        # Debug logging for environment variables
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"Environment variables for {config.name}: {len(env)} total")
+            config_vars = list(config.env.keys()) if config.env else []
+            cred_vars = [k for k in self.credentials.keys() if isinstance(k, str)]
+            if config_vars or cred_vars:
+                logger.debug(f"Custom variables - config: {config_vars}, credentials: {cred_vars}")
 
         # Start the process
         try:

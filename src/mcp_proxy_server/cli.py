@@ -14,6 +14,7 @@ from typing import Optional
 
 import click
 from pydantic import ValidationError
+from dotenv import load_dotenv
 
 from . import __version__
 from .config import ProxyConfig, ConfigLoader, DeploymentMethod
@@ -54,6 +55,9 @@ def setup_logging(level: str, log_file: Optional[str] = None) -> None:
 @click.pass_context
 def cli(ctx, verbose: bool, debug: bool, log_file: Optional[str]) -> None:
     """MCP Proxy Server - Aggregate multiple MCP servers."""
+    # Load environment variables from .env file
+    load_dotenv()
+
     # Ensure context object exists
     ctx.ensure_object(dict)
 
