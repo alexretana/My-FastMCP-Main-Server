@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union, Any, Literal
 from enum import Enum
 
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 import yaml
 
 
@@ -54,18 +54,20 @@ class ServerConfig(BaseModel):
     retry_delay: float = Field(1.0, description="Delay between retries in seconds")
     namespace: Optional[str] = Field(None, description="Namespace prefix for tools/resources")
 
-    @validator('command')
-    def validate_command_for_stdio(cls, v, values):
+    @field_validator('command')
+    @classmethod
+    def validate_command_for_stdio(cls, v, info):
         """Validate that stdio transport has a command."""
-        transport = values.get('transport')
+        transport = info.data.get('transport')
         if transport == TransportType.STDIO and not v:
             raise ValueError("stdio transport requires a command")
         return v
 
-    @validator('url')
-    def validate_url_for_http_sse(cls, v, values):
+    @field_validator('url')
+    @classmethod
+    def validate_url_for_http_sse(cls, v, info):
         """Validate that HTTP/SSE transport has a URL."""
-        transport = values.get('transport')
+        transport = info.data.get('transport')
         if transport in (TransportType.HTTP, TransportType.SSE) and not v:
             raise ValueError(f"{transport} transport requires a url")
         return v
@@ -139,14 +141,16 @@ class ProxyConfig(BaseModel):
         description="Detected deployment method"
     )
 
-    @validator('servers')
+    @field_validator('servers')
+    @classmethod
     def validate_servers_not_empty(cls, v):
         """Ensure at least one server is configured."""
         if not v:
             raise ValueError("At least one server must be configured")
         return v
 
-    @validator('servers')
+    @field_validator('servers')
+    @classmethod
     def validate_unique_server_names(cls, v):
         """Ensure server names are unique."""
         names = [server.name for server in v]

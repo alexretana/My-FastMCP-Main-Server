@@ -106,7 +106,7 @@ class MCPProxyServer:
                 async def init_and_run():
                     await self.fastmcp_proxy.initialize()
                     await self.fastmcp_proxy.start()
-                    self.fastmcp_proxy.run_stdio()
+                    await self.fastmcp_proxy.run_stdio_async()
 
                 asyncio.run(init_and_run())
             else:

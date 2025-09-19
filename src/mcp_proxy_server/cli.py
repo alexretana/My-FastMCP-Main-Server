@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 from . import __version__
 from .config import ProxyConfig, ConfigLoader, DeploymentMethod
 from .credentials import CredentialManager
-from .proxy import MCPProxyServer
+from .proxy import FastMCPProxyServer
 
 
 def setup_logging(level: str, log_file: Optional[str] = None) -> None:
@@ -150,7 +150,7 @@ def run(ctx, config: Optional[Path], host: Optional[str], port: Optional[int], d
             click.echo(f"Deployment method: {deployment_info['deployment_method']}")
 
         # Create and start proxy server
-        proxy_server = MCPProxyServer(proxy_config, credentials)
+        proxy_server = FastMCPProxyServer(proxy_config, credentials)
 
         click.echo(f"Starting MCP proxy server on {proxy_config.host}:{proxy_config.port}")
         click.echo(f"Transport: {proxy_config.transport}")

@@ -1,5 +1,5 @@
 {
-	"claudeCodeChat.permissions.yoloMode": true,
+	"claudeCodeChat.permissions.yoloMode": false,
 	"python.testing.pytestArgs": [
 		"tests"
 	],

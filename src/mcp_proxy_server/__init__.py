@@ -7,15 +7,19 @@ endpoint with support for multiple transport protocols.
 """
 
 __version__ = "0.1.0"
-__author__ = "MCP Proxy Contributors"
-__email__ = "mcp-proxy@example.com"
+__author__ = "Alexander Retana (AI Generated)"
+__email__ = "alex.retana@live.com"
 
-from .proxy import MCPProxyServer
+from .proxy import FastMCPProxyServer
 from .config import ProxyConfig, ServerConfig
 from .credentials import CredentialManager
 
+# Keep backward compatibility alias
+MCPProxyServer = FastMCPProxyServer
+
 __all__ = [
-    "MCPProxyServer",
+    "FastMCPProxyServer",
+    "MCPProxyServer",  # backward compatibility
     "ProxyConfig",
     "ServerConfig",
     "CredentialManager",
