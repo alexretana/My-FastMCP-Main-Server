@@ -134,9 +134,9 @@ class ServerRegistry:
         if not config.command:
             raise ValueError("stdio transport requires a command")
 
-        # Prepare environment
-        env = dict(self.credentials)
-        env.update(config.env)
+        # Prepare environment - ensure all values are strings
+        env = {k: str(v) for k, v in self.credentials.items() if isinstance(k, str)}
+        env.update({k: str(v) for k, v in config.env.items() if isinstance(k, str)})
 
         # Start the process
         try:
