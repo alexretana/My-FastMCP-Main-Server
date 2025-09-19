@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
 
 [project]
 name = "mcp-proxy-server"
@@ -63,15 +63,6 @@ Issues = "https://github.com/your-org/mcp-proxy-server/issues"
 [project.scripts]
 mcp-proxy = "mcp_proxy_server.cli:main"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/mcp_proxy_server"]
-
-[tool.hatch.build.targets.sdist]
-include = [
-    "/src",
-    "/README.md",
-    "/LICENSE",
-]
 
 [tool.black]
 line-length = 88
@@ -157,17 +148,3 @@ exclude_lines = [
     "if TYPE_CHECKING:",
 ]
 
-[tool.uv.workspace]
-members = [
-    ".",
-    ".",
-    ".",
-]
-
-[tool.uv.sources]
-mcp-proxy-server = { workspace = true }
-
-[dependency-groups]
-dev = [
-    "mcp-proxy-server",
-]
