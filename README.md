@@ -63,20 +63,24 @@ docker-compose -f templates/docker-compose.yml up
   "log_level": "INFO",
   "servers": [
     {
-      "name": "filesystem",
+      "name": "playwright",
       "transport": "stdio",
-      "command": ["uvx", "run", "mcp-server-filesystem", "--", "/path/to/directory"],
-      "enabled": true,
-      "namespace": "fs"
+      "command": ["npx", "@playwright/mcp@latest"],
+      "enabled": false,
+      "timeout": 30,
+      "namespace": "playwright"
     },
     {
-      "name": "weather",
+      "name": "obsidian",
       "transport": "stdio",
-      "command": ["uvx", "run", "mcp-server-weather"],
+      "command": ["uvx", "mcp-obsidian"],
       "enabled": true,
-      "namespace": "weather",
+      "timeout": 30,
+      "namespace": "obsidian",
       "env": {
-        "WEATHER_API_KEY": "${WEATHER_API_KEY}"
+        "OBSIDIAN_API_KEY": "${OBSIDIAN_API_KEY}",
+        "OBSIDIAN_HOST": "${OBSIDIAN_HOST:-127.0.0.1}",
+        "OBSIDIAN_PORT": "${OBSIDIAN_PORT:-27124}"
       }
     }
   ]
@@ -99,6 +103,31 @@ Add to your Claude Desktop configuration:
   }
 }
 ```
+
+**Alternative Configuration (using working directory):**
+
+If you prefer to use a working directory approach without specifying the config path explicitly:
+
+```json
+{
+  "mcpServers": {
+    "fastmcp-main-server": {
+      "type": "stdio",
+      "command": "D:\\path\\to\\mcp-proxy.exe",
+      "args": ["run"],
+      "env": {
+        "DEBUG": "true"
+      },
+      "cwd": "D:\\path\\to\\your\\project\\"
+    }
+  }
+}
+```
+
+In this configuration:
+- The `cwd` (current working directory) should point to the directory containing your config file
+- The CLI will automatically look for `mcp-proxy.json`, `config.json`, or similar files in that directory
+- No explicit `--config` argument is needed
 
 #### Cursor
 

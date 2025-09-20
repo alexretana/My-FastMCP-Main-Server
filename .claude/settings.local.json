@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "mcp__MCP_DOCKER__resolve-library-id",
-      "mcp__MCP_DOCKER__get-library-docs"
+      "mcp__MCP_DOCKER__get-library-docs",
+      "Bash(mcp:*)",
+      "Bash(python -m mcp_proxy_server.cli run:*)",
+      "Bash(python:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(uvx:*)"
     ],
     "deny": [],
     "ask": []
